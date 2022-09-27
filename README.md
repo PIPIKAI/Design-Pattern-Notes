@@ -577,30 +577,31 @@ Sunny软件公司开发人员发现在创建具体Chart对象时，每更换一�
 再通过一个工具类XMLUtil来读取配置文件中的字符串参数，XMLUtil类的代码如下所示：
 
 ```java
-import javax.xml.parsers.*;  
-import org.w3c.dom.*;  
-import org.xml.sax.SAXException;  
-import java.io.*;  
-public class XMLUtil {  
+import javax.xml.parsers.*;
+
+import org.w3c.dom.*;
+
+import java.io.*;
+
+public class XMLUtil {
     //该方法用于从XML配置文件中提取图表类型，并返回类型名  
-    public static String getChartType() {  
-        try {  
+    public static String getChartType() {
+        try {
             //创建文档对象  
-            DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();  
-            DocumentBuilder builder = dFactory.newDocumentBuilder();  
-            Document doc;                             
-            doc = builder.parse(new File("config.xml"));   
+            DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = dFactory.newDocumentBuilder();
+            Document doc;
+            doc = builder.parse(new File("pattern/created/FactoryMethodPattern/v1/config.xml"));
             //获取包含图表类型的文本节点  
-            NodeList nl = doc.getElementsByTagName("chartType");  
-            Node classNode = nl.item(0).getFirstChild();  
-            String chartType = classNode.getNodeValue().trim();  
-            return chartType;  
-        }     
-        catch(Exception e) {  
-            e.printStackTrace();  
-            return null;  
-        }  
-    }  
+            NodeList nl = doc.getElementsByTagName("chartType");
+            Node classNode = nl.item(0).getFirstChild();
+            String chartType = classNode.getNodeValue().trim();
+            return chartType;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 ```
 
@@ -739,3 +740,220 @@ class LoggerFactory {
 
 ![工厂三兄弟之工厂方法模式（二） - 图1](.assets/3f0c9e9408b8afe361fc179754c427a4.png)
 
+图2 工厂方法模式结构图
+
+在工厂方法模式结构图中包含如下几个角色：
+
+● Product（抽象产品）：它是定义产品的接口，是工厂方法模式所创建对象的超类型，也就是产品对象的公共父类。
+
+● ConcreteProduct（具体产品）：它实现了抽象产品接口，某种类型的具体产品由专门的具体工厂创建，具体工厂和具体产品之间一一对应。
+
+● Factory（抽象工厂）：在抽象工厂类中，声明了工厂方法(Factory Method)，用于返回一个产品。抽象工厂是工厂方法模式的核心，所有创建对象的工厂类都必须实现该接口。
+
+● ConcreteFactory（具体工厂）：它是抽象工厂类的子类，实现了抽象工厂中定义的工厂方法，并可由客户端调用，返回一个具体产品类的实例。
+
+与简单工厂模式相比，工厂方法模式最重要的区别是引入了抽象工厂角色，抽象工厂可以是接口，也可以是抽象类或者具体类，其典型代码如下所示：
+
+```java
+interface Factory {  
+    public Product factoryMethod();  
+}
+```
+
+在抽象工厂中声明了工厂方法但并未实现工厂方法，具体产品对象的创建由其子类负责，客户端针对抽象工厂编程，可在运行时再指定具体工厂类，具体工厂类实现了工厂方法，不同的具体工厂可以创建不同的具体产品，其典型代码如下所示：
+
+```java
+class ConcreteFactory implements Factory {  
+    public Product factoryMethod() {  
+        return new ConcreteProduct();  
+    }  
+}
+```
+
+在实际使用时，具体工厂类在实现工厂方法时除了创建具体产品对象之外，还可以负责产品对象的初始化工作以及一些资源和环境配置工作，例如连接数据库、创建文件等。
+
+在客户端代码中，只需关心工厂类即可，不同的具体工厂可以创建不同的产品，典型的客户端类代码片段如下所示：
+
+```java
+……  
+Factory factory;  
+factory = new ConcreteFactory(); //可通过配置文件实现  
+Product product;  
+product = factory.factoryMethod();  
+……
+```
+
+可以通过配置文件来存储具体工厂类ConcreteFactory的类名，更换新的具体工厂时无须修改源代码，系统扩展更为方便。
+
+思考
+
+> 工厂方法模式中的工厂方法能否为静态方法？为什么？
+
+#### 工厂三兄弟之工厂方法模式（三）
+
+3 完整解决方案
+
+Sunny公司开发人员决定使用工厂方法模式来设计日志记录器，其基本结构如图3所示：
+
+![日志记录器结构图](.assets/770c148856f7092ed5e42a1eff7f024d.png)
+
+图3 日志记录器结构图
+
+在图3中，Logger接口充当抽象产品，其子类FileLogger和DatabaseLogger充当具体产品，LoggerFactory接口充当抽象工厂，其子类FileLoggerFactory和DatabaseLoggerFactory充当具体工厂。完整代码如下所示：
+
+```java
+ //日志记录器接口：抽象产品  
+interface Logger {  
+    public void writeLog();  
+}  
+//数据库日志记录器：具体产品  
+class DatabaseLogger implements Logger {  
+    public void writeLog() {  
+        System.out.println("数据库日志记录。");  
+    }  
+}  
+//文件日志记录器：具体产品  
+class FileLogger implements Logger {  
+    public void writeLog() {  
+        System.out.println("文件日志记录。");  
+    }  
+}  
+//日志记录器工厂接口：抽象工厂  
+interface LoggerFactory {  
+    public Logger createLogger();  
+}  
+//数据库日志记录器工厂类：具体工厂  
+class DatabaseLoggerFactory implements LoggerFactory {  
+    public Logger createLogger() {  
+            //连接数据库，代码省略  
+            //创建数据库日志记录器对象  
+            Logger logger = new DatabaseLogger();   
+            //初始化数据库日志记录器，代码省略  
+            return logger;  
+    }     
+}  
+//文件日志记录器工厂类：具体工厂  
+class FileLoggerFactory implements LoggerFactory {  
+    public Logger createLogger() {  
+            //创建文件日志记录器对象  
+            Logger logger = new FileLogger();   
+            //创建文件，代码省略  
+            return logger;  
+    }     
+}
+```
+
+编写如下客户端测试代码：
+
+```java
+class Client {  
+    public static void main(String args[]) {  
+        LoggerFactory factory;  
+        Logger logger;  
+        factory = new FileLoggerFactory(); //可引入配置文件实现  
+        logger = factory.createLogger();  
+        logger.writeLog();  
+    }  
+}
+```
+
+编译并运行程序，输出结果如下：
+
+文件日志记录。
+
+4 反射与配置文件
+
+为了让系统具有更好的灵活性和可扩展性，Sunny公司开发人员决定对日志记录器客户端代码进行重构，使得可以在不修改任何客户端代码的基础上更换或增加新的日志记录方式。
+
+在客户端代码中将不再使用new关键字来创建工厂对象，而是将具体工厂类的类名存储在配置文件（如XML文件）中，通过读取配置文件获取类名字符串，再使用Java的反射机制，根据类名字符串生成对象。在整个实现过程中需要用到两个技术：Java反射机制与配置文件读取。软件系统的配置文件通常为XML文件，我们可以使用DOM (Document Object Model)、SAX (Simple API for XML)、StAX (Streaming API for XML)等技术来处理XML文件。关于DOM、SAX、StAX等技术的详细学习大家可以参考其他相关资料，在此不予扩展。
+
+扩展
+
+关于Java与XML的相关资料，大家可以阅读Tom Myers和Alexander Nakhimovsky所著的《Java XML编程指南》一书或访问developer Works 中国中的“Java XML 技术专题”，参考链接： http://www.ibm.com/developerworks/cn/xml/theme/x-java.html
+
+Java反射(Java Reflection)是指在程序运行时获取已知名称的类或已有对象的相关信息的一种机制，包括类的方法、属性、父类等信息，还包括实例的创建和实例类型的判断等。在反射中使用最多的类是Class，Class类的实例表示正在运行的Java应用程序中的类和接口，其forName(String className)方法可以返回与带有给定字符串名的类或接口相关联的 Class对象，再通过Class对象的newInstance()方法创建此对象所表示的类的一个新实例，即通过一个类名字符串得到类的实例。如创建一个字符串类型的对象，其代码如下：
+
+```java
+//通过类名生成实例对象并将其返回  
+Class c=Class.forName("String");  
+Object obj=c.newInstance();  
+return obj;
+```
+
+此外，在JDK中还提供了java.lang.reflect包，封装了其他与反射相关的类，此处只用到上述简单的反射代码，在此不予扩展。
+
+Sunny公司开发人员创建了如下XML格式的配置文件config.xml用于存储具体日志记录器工厂类类名：
+
+```xml
+<!— config.xml -->  
+<?xml version="1.0"?>  
+<config>  
+    <className>FileLoggerFactory</className>  
+</config>
+```
+
+为了读取该配置文件并通过存储在其中的类名字符串反射生成对象，Sunny公司开发人员开发了一个名为XMLUtil的工具类，其详细代码如下所示：
+
+```java
+//工具类XMLUtil.java  
+
+import javax.xml.parsers.*;
+
+import org.w3c.dom.*;
+
+import java.io.*;
+
+public class XMLUtil {
+    //该方法用于从XML配置文件中提取具体类类名，并返回一个实例对象  
+    public static Object getBean() {
+        try {
+            //创建DOM文档对象  
+            DocumentBuilderFactory dFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = dFactory.newDocumentBuilder();
+            Document doc;
+            doc = builder.parse(new File("pattern/created/FactoryMethodPattern/v1/config.xml"));
+            //获取包含类名的文本节点  
+            NodeList nl = doc.getElementsByTagName("className");
+            Node classNode = nl.item(0).getFirstChild();
+            String cName = classNode.getNodeValue();
+            //通过类名生成实例对象并将其返回  
+            Class c = Class.forName(cName);
+            Object obj = c.newInstance();
+            return obj;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+```
+
+有了XMLUtil类后，可以对日志记录器的客户端代码进行修改，不再直接使用new关键字来创建具体的工厂类，而是将具体工厂类的类名存储在XML文件中，再通过XMLUtil类的静态工厂方法getBean()方法进行对象的实例化，代码修改如下：
+
+```java
+class Client {  
+    public static void main(String args[]) {  
+        LoggerFactory factory;  
+        Logger logger;  
+        factory = (LoggerFactory)XMLUtil.getBean(); //getBean()的返回类型为Object，需要进行强制类型转换  
+        logger = factory.createLogger();  
+        logger.writeLog();  
+    }  
+}
+```
+
+引入XMLUtil类和XML配置文件后，如果要增加新的日志记录方式，只需要执行如下几个步骤：
+
+(1) 新的日志记录器需要继承抽象日志记录器Logger；
+
+(2) 对应增加一个新的具体日志记录器工厂，继承抽象日志记录器工厂LoggerFactory，并实现其中的工厂方法createLogger()，设置好初始化参数和环境变量，返回具体日志记录器对象；
+
+(3) 修改配置文件config.xml，将新增的具体日志记录器工厂类的类名字符串替换原有工厂类类名字符串；
+
+(4) 编译新增的具体日志记录器类和具体日志记录器工厂类，运行客户端测试类即可使用新的日志记录方式，而原有类库代码无须做任何修改，完全符合“开闭原则”。
+
+通过上述重构可以使得系统更加灵活，由于很多设计模式都关注系统的可扩展性和灵活性，因此都定义了抽象层，在抽象层中声明业务方法，而将业务方法的实现放在实现层中。 疑问 思考
+
+有人说：可以在客户端代码中直接通过反射机制来生成产品对象，在定义产品对象时使用抽象类型，同样可以确保系统的灵活性和可扩展性，增加新的具体产品类无须修改源代码，只需要将其作为抽象产品类的子类再修改配置文件即可，根本不需要抽象工厂类和具体工厂类。
+
+试思考这种做法的可行性？如果可行，这种做法是否存在问题？为什么？

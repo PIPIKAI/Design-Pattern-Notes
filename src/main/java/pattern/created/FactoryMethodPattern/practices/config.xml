@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<configs>
+    <config>
+        <format>jpg</format>
+        <className>JpgReaderFactory</className>
+    </config>
+    <config>
+        <format>png</format>
+        <className>PngReaderFactory</className>
+    </config>
+    <config>
+        <format>gif</format>
+        <className>GifReaderFactory</className>
+    </config>
+    <config>
+        <format>tif</format>
+        <className>TifReaderFactory</className>
+    </config>
+</configs>
