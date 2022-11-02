@@ -30,6 +30,7 @@ public class XmlUtil {
 
             Element rootElement = document.getRootElement();
 
+
             Iterator<Element> iterator = rootElement.elementIterator();
             while (iterator.hasNext()){
                 Element child = (Element) iterator.next();
